@@ -1,24 +1,35 @@
 import express from "express";
-import dotenv from 'dotenv';
-import path from 'path';
+import dotenv from 'dotenv'
+import { buildAgent } from './builder/agentBuilder.js';
 import { fileURLToPath } from 'url';
+import path from 'path';
+import cors from 'cors';
 
-dotenv.config({ path:'./.env' });
+dotenv.config(
+    {
+        path:'./.env'
+    }
+)
 
-const app = express();
+const app = express()
+
 app.use(express.json());
+app.use(cors({
+    origin: 'http://127.0.0.1:5500'
+}));
 
-// Setup __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve agents folder
-app.use('/agents', express.static(path.join(__dirname, 'agents')));
 
-// Dummy POST route to create agent
+
+
+app.get('/',async(req,res)=>{
+    res.send("Hello world")
+    res.end
+})
+
 app.post('/create-agent', (req, res) => {
     const { name, taskDescription } = req.body || {};
     if (!name || !taskDescription) {
@@ -26,26 +37,19 @@ app.post('/create-agent', (req, res) => {
     }
 
     try {
+        // Dummy file path
         const dummyFilePath = `agents/${name}.js`;
-
-        // Optionally, create dummy file on disk
-        // fs.writeFileSync(path.join(__dirname, dummyFilePath), "// Dummy agent file");
 
         return res.json({
             message: "Dummy agent created!",
             filePath: dummyFilePath,
             taskDescription
         });
-    } catch(err) {
+    } catch (err) {
         return res.status(500).json({ error: err.message });
     }
 });
 
 
-
-try {
-    app.listen(5000, () => console.log(`Server running on port`));
-} catch(err) {
-    console.error("Server failed:", err);
-}
-
+app.listen(3000,()=>console.log("server is running")
+)
